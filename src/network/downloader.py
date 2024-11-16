@@ -1,6 +1,10 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
+# Get the absolute path to the root directory of your project
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+# Add the project root to sys.path
+sys.path.append(project_root)
 
 import logging
 import requests
@@ -74,14 +78,13 @@ class Downloader:
         """
         try:
             response = requests.get(self.request_url)
-            print(self.request_url)
             response.raise_for_status()
 
             ## Printing headers and them values
             #for header, value in response.headers.items():
             #    logging.info(f"{header}: {value}")
             data = response.text
-            logging.info('Data downloaded successfully.')
+            logging.info(f"Data downloaded successfully.\n\n{data}")
             return data
         except requests.exceptions.RequestException as e:
             logging.error(f"Error during downloading data: {e}")

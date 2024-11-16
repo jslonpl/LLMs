@@ -10,15 +10,35 @@ sys.path.append(project_root)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 from src.network.downloader import Downloader
+from src.network.uploader import Uploader
+from src.api.openai_api import OpenAIClient
 
 def main():
-    filename = 'cenzura.txt'
+    filename = "cenzura.txt"
+    taskname = "CENZURA"
     downloader = Downloader(filename)
+    uploader = Uploader(taskname)
+    text_to_censore = downloader.get_file_txt()
+    client = OpenAIClient()
 
-    print(downloader.get_file_txt())
+    prompt = f"Replace the personal data with word CENZURA. Do not change the phrase structure. <Example>Input:Nazywam się James Bond. Mieszkam w Warszawie na ulicy Pięknej 5, Mam 28 lat. Output:Nazywam się CENZURA. Mieszkam w CENZURA na ulicy CENZURA. Mam CENZURA lat.</Example>{text_to_censore}"
+
+    censored_text = client.generate_response(
+        prompt,
+        model= "gpt-3.5-turbo-0125",
+        max_tokens=100
+    )
+    
+    print(censored_text)
+    uploader.send_data(censored_text)
+    
+    print(censored_text)
 
 
 
 
 if __name__ == "__main__":
     main()
+"""
+    curl -s -d'{"task": "CENZURA", "apikey": "7c51149e-f594-4a6f-9503-7420e771b9fb", "answer": "Informacje o podejrzanym: CENZURA. Mieszka w CENZURA przy ulicy CENZURA. Wiek: CENZURA lata."}' https://centrala.ag3nts.org/report | jq
+"""
