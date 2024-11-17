@@ -1,15 +1,15 @@
 import os
 import sys
+from pathlib import Path
 
-# Get the absolute path to the root directory of your project
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-# Add the project root to sys.path
+# Add project root to Python path
+project_root = str(Path(__file__).parent.parent.parent.parent)
 sys.path.append(project_root)
 
-import requests
 import logging
+import requests
 import json
-from config.settings import Config
+from src.api.aidevs3.client import Aidevs3Client
 
 class Uploader:
     """
@@ -21,24 +21,20 @@ class Uploader:
 
     def __init__(self, taks_name: str):
         self.task_name = taks_name
-        self.aidevs3_api_key = Config.get_key('AI_DEVS_3_API_KEY')
+        self.client = Aidevs3Client()
+        self.api_key = self.client.get_api_key()
+        self.response_url = self.client.get_endpoint_url()
 
-        if not self.aidevs3_api_key:
-            raise ValueError("Missing 'AI_DEVS_3_API_KEY'.")
-        
-        self.response_request_url = f"https://centrala.ag3nts.org/report"
-
-    
     def send_data(self, data) -> bool:
         """
         Send response to the server
 
         :return: True if sending was successful, Otherwise False
         """
-        print(self.aidevs3_api_key)
+
         payload = {
             "task": str(self.task_name),
-            "apikey": str(self.aidevs3_api_key),
+            "apikey": str(self.api_key),
             "answer": str(data)
         }
         
@@ -47,7 +43,7 @@ class Uploader:
         print(data)
 
         try:
-            response = requests.post(self.response_request_url, json=payload)
+            response = requests.post(self.response_url, json=payload)
             response.raise_for_status()
             response_data = response.json()
             logging.info("Data was sent successfully.")
@@ -56,3 +52,4 @@ class Uploader:
         except requests.exceptions.RequestException as e:
             logging.error(f"Error during sending data: {e} , resp status_code: {response.status_code} : {response.text}")
             return False
+

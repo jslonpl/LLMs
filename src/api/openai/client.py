@@ -1,15 +1,20 @@
+import os
 import requests
-from config.settings import Config
+from dotenv import load_dotenv
+
 
 class OpenAIClient:
-    def __init__(self, api_key=None):
-        self.api_key = Config.get_key("OPEN_AI_API_KEY")
+    def __init__(self):
+        load_dotenv()
+        self.api_key = self._get_env_var("OPEN_AI_API_KEY")
         self.base_url = 'https://api.openai.com/v1'
 
-        if not self.api_key:
-            raise ValueError('Missing OPEN_AI_API_KEY. Chceck configuration file.')
-        
-    
+    def _get_env_var(self, var_name: str) -> str:
+        value = os.getenv(var_name)
+        if not value:
+            raise ValueError(f"Environment variable {var_name} is not set.")
+        return value
+
     def _headers(self):
         # Returns authorization headers required for communication with the OpenAI API
         return {
@@ -17,7 +22,6 @@ class OpenAIClient:
             "Content-Type": "application/json",
         }
     
-
     def generate_response(self, prompt, model='gpt-4', max_tokens=50):
         # Returns model response based on prompt for selected model
         url = f"{self.base_url}/chat/completions" # FUlly endpoint to response generation

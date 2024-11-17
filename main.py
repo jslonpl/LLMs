@@ -11,6 +11,7 @@ def test_generate_text():
         print(f"Odpowiedz modelu: {response}")
     except Exception as e:
         print(f"Błąd podczas testu: {e}")
+        
 
 
 if __name__ == "__main__":

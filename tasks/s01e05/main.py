@@ -9,9 +9,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 sys.path.append(project_root)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-from src.network.downloader import Downloader
-from src.network.uploader import Uploader
-from src.api.openai_api import OpenAIClient
+from src.api.aidevs3.downloader import Downloader
+from src.api.aidevs3.uploader import Uploader
+from src.api.openai.client import OpenAIClient
+
 
 def main():
     filename = "cenzura.txt"

@@ -1,41 +1,38 @@
-import os
 import sys
+from pathlib import Path
 
-# Get the absolute path to the root directory of your project
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-# Add the project root to sys.path
+# Add project root to Python path
+project_root = str(Path(__file__).parent.parent.parent.parent)
 sys.path.append(project_root)
 
 import logging
 import requests
-from config.settings import Config
+from src.api.aidevs3.client import Aidevs3Client
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
 
 class Downloader:
     """ Class for download file """
-    def __init__(self, filename:str ):
+    def __init__(self, filename: str):
         self.filename = filename
-        self.aidevs3_api_key = Config.get_key('AI_DEVS_3_API_KEY')
-        
-        if not self.aidevs3_api_key:
-            raise ValueError("Missing 'AI_DEVS_3_API_KEY'.")
-        
-        self.request_url = f"https://centrala.ag3nts.org/data/{self.aidevs3_api_key}/{self.filename}"
+        self.client = Aidevs3Client()
+        self.api_key = self.client.get_api_key()
+        self.data_url = self.client.get_data_url()
+        self.request_url = f"{self.data_url}/{self.api_key}/{self.filename}"
+
     
-
     def download_file_txt(self):
-        """
-        Download file from url and save it to file on disc.
-
-        return: True if download was successful
+        """ 
+        Download file from url and save it to file on disc. 
+        
+        :return: True if download was successful
         """
         try:
             response = requests.get(self.request_url)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            logging.error(f" Error during download file: {e}")
+            logging.error(f"Error during download file: {e}")
             return False
         
         try:
@@ -46,13 +43,13 @@ class Downloader:
         except IOError as e:
             logging.error(f"Error during saving file: {e}")
             return False
-
         
+
     def get_file_json(self):
         """
         Download data from URL and return as a JSON.
 
-        return: Dict representig JSON data or None if error occurs.
+        :return: Dict representig JSON data or None if error occurs.
         """
 
         try:
@@ -74,7 +71,7 @@ class Downloader:
         """
         Download data from URL and return as a TXT.
 
-        return: Dict representig TXT data or None if error occurs.
+        :return: Dict representig TXT data or None if error occurs.
         """
         try:
             response = requests.get(self.request_url)
@@ -89,3 +86,4 @@ class Downloader:
         except requests.exceptions.RequestException as e:
             logging.error(f"Error during downloading data: {e}")
             return None
+
