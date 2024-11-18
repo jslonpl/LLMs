@@ -40,6 +40,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-"""
-    curl -s -d'{"task": "CENZURA", "apikey": "7c51149e-f594-4a6f-9503-7420e771b9fb", "answer": "Informacje o podejrzanym: CENZURA. Mieszka w CENZURA przy ulicy CENZURA. Wiek: CENZURA lata."}' https://centrala.ag3nts.org/report | jq
-"""
