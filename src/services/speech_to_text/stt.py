@@ -1,5 +1,13 @@
+import sys
 import whisper
 from typing import Dict, Optional
+from pathlib import Path
+
+# Add project root to Python path
+project_root = str(Path(__file__).parent.parent.parent.parent)
+sys.path.append(project_root)
+
+from src.utils.file_handler import FileHandler
 
 class SpeechToTextModel:
     """ ABS base class for speach to text models implementation. """
@@ -57,6 +65,7 @@ class STTService:
         :param model: an instance of the class inheriting from SpeechToTextModel.
         """
         self.model = model
+        self.handler = FileHandler()
 
     def transcription(self, file_path: str, language: Optional[str] = None) -> Dict:
         """
@@ -67,3 +76,13 @@ class STTService:
         :return: Transcription result returned as dictionary.
         """
         return self.model.transcribe(file_path, language)
+    
+    def save_transcription(self, text: str, dst_path : str) -> None:
+        """
+        Save transcription to the .txt file
+
+        :param text: Text of transcription to save.
+        :param dst_path: Path to destination directory, where file should be save.
+        """
+        self.handler.save_txt(dst_path, text)
+        

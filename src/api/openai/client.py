@@ -22,13 +22,15 @@ class OpenAIClient:
             "Content-Type": "application/json",
         }
     
-    def generate_response(self, prompt, model='gpt-4', max_tokens=50):
+    def generate_response(self, prompt, model='gpt-4', max_tokens=50, temperature=1.0, top_p=1.0):
         # Returns model response based on prompt for selected model
         url = f"{self.base_url}/chat/completions" # FUlly endpoint to response generation
         payload = {
             "model": model,
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": max_tokens,
+            "temperature" : temperature,
+            "top_p": top_p
         }
 
         response = requests.post(url, headers=self._headers(), json=payload)
