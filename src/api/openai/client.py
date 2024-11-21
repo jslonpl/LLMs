@@ -52,3 +52,23 @@ class OpenAIClient:
             error_message = "Communication with OpenAI error."
 
         raise Exception(f"API Error ({resposne.status_code}): {error_message}")
+    
+
+    def generate_image(self, prompt: str, img_size:str="1024x1024") -> str:
+        """ Generate an image besed on the provided prompt """
+        url = f"{self.base_url}/images/generations"
+        payload = {
+            "prompt": prompt,
+            "n": 1,
+            "size": img_size
+        }
+
+        response = requests.post(url, headers=self._headers(), json=payload)
+
+                # Error handling
+        if response.status_code != 200:
+            self._handle_error(response)
+
+        response_data = response.json()
+        return response_data.get("data", [])[0].get("url", "")
+
