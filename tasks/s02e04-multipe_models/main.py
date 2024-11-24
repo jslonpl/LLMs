@@ -12,21 +12,15 @@ sys.path.append(project_root)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-from src.api.aidevs3.downloader import Downloader
 from src.api.aidevs3.uploader import Uploader
-from src.api.openai.client import OpenAIClient
-from src.utils.file_handler import FileHandler
-from src.utils.text_processor import TextProcessor
 from file_manager import FileManager
 
 def main():
     dir_path = "tasks/s02e04-multipe_models/pliki_z_fabryki"
     task_name = "kategorie"
-
     vision_prompt_path = "tasks/s02e04-multipe_models/prompts/vision_prompt.txt"
     llm_system_prompt_path = "tasks/s02e04-multipe_models/prompts/llm_system_prompt.txt"
-    clinet_openai = OpenAIClient()
-    handler = FileHandler()
+    
     uploader = Uploader(task_name)
     file_manager = FileManager(dir_path, llm_system_prompt_path, vision_prompt_path)
 
