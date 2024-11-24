@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+from src.utils.file_handler import FileHandler
 
 
 class OpenAIClient:
@@ -22,14 +23,17 @@ class OpenAIClient:
             "Content-Type": "application/json",
         }
     
-    def generate_response(self, prompt, model='gpt-4', max_tokens=50, temperature=1.0, top_p=1.0):
+    def generate_response(self, system_prompt: str="", message:str="", model:str='gpt-4', max_tokens:int=50, temperature:float=1.0, top_p:float=1.0):
         # Returns model response based on prompt for selected model
         url = f"{self.base_url}/chat/completions" # FUlly endpoint to response generation
         payload = {
             "model": model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages":[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ],
             "max_tokens": max_tokens,
-            "temperature" : temperature,
+            "temperature": temperature,
             "top_p": top_p
         }
 
@@ -65,10 +69,48 @@ class OpenAIClient:
 
         response = requests.post(url, headers=self._headers(), json=payload)
 
-                # Error handling
+        # Error handling
         if response.status_code != 200:
             self._handle_error(response)
 
         response_data = response.json()
         return response_data.get("data", [])[0].get("url", "")
+    
 
+    def generate_visual_resposne(self, prompt: str, model: str = "gpt-4o", image_path: str = "", max_tokens: int=1000, temperature: float=1.0, top_p: float=1.0):
+        """ Return model response based on prompt for gpt-4-visual model."""
+        handler = FileHandler()
+        base64_image = handler.load_image_base64(image_path)
+        url = url = f"{self.base_url}/chat/completions"
+        payload = {
+            "model": model,
+            "messages": [
+                {
+                    "role":"user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt,
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": base64_image
+                            },
+                        },
+                    ],
+                }
+            ],
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "top_p": top_p
+        }
+        
+        response = requests.post(url, headers=self._headers(), json=payload)
+
+        # Error Handling
+        if response.status_code != 200:
+            self._handle_error(response)
+
+        response_data = response.json()
+        return response_data.get("choices", [])[0].get("message", {}).get("content", "")

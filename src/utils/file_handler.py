@@ -1,5 +1,8 @@
 import json
 import logging
+import base64
+import imghdr
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -12,6 +15,7 @@ class FileHandler():
     - save text files to disc (.txt)
     - read JSON files from disc (.json)
     - save JSON files to disc (.json)
+    - load image and return its base64 encoded string
 
     Usage exampe:
     handler = FileHandler()
@@ -66,3 +70,43 @@ class FileHandler():
                 logging.info(f"Successfully saved JSON file: {file_path}")
         except Exception as e:
             logging.error(f"Error occured during saving JSON file: {e}")
+
+    @staticmethod
+    def load_image_base64(file_path: str) -> str:
+        """
+        Loads an image and returns its base64 encoded string.
+
+        Params:
+            file_path (str): Path to the image file
+
+        Returns:
+            str: Base64 encoded image string
+        """
+        try:
+            if not Path(file_path).is_file():
+                raise FileNotFoundError(f"Image file not found at path: {file_path}")
+            
+            image_format = imghdr.what(file_path)
+            supported_formats = ['jpeg', 'png', 'gif', 'bmp']
+            if not image_format or image_format.lower() not in supported_formats:
+                raise ValueError(f"Unsupported image format: {image_format}")
+            
+            with open(file_path, "rb") as image_file:
+                encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
+
+            # Mapowanie formatu obrazu na typ MIME
+            mime_type = f"image/{'jpeg' if image_format == 'jpeg' else image_format}"
+            data_url = f"data:{mime_type};base64,{encoded_image}"
+            
+            logging.info(f"Successfully loaded and encoded image: {file_path}")
+            return data_url
+        
+        except FileNotFoundError as e:
+            logging.error(f"Image file not found: {e}")
+            raise
+        except ValueError as e:
+            logging.error(f"Invalid image format: {e}")
+            raise
+        except Exception as e:
+            logging.error(f"Error occurred during image processing: {e}")
+            raise

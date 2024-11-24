@@ -8,4 +8,5 @@ __pycache__/
 venv/
 .DS_Store
 Prompt-Engineer-metaprompt.md
+tasks/s02e04-multipe_models/pliki_z_fabryki/
 *.m4a

@@ -35,7 +35,7 @@ class Uploader:
         payload = {
             "task": str(self.task_name),
             "apikey": str(self.api_key),
-            "answer": str(data)
+            "answer": data
         }
         
 
