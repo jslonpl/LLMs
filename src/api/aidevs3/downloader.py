@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -19,10 +20,11 @@ class Downloader:
         self.client = Aidevs3Client()
         self.api_key = self.client.get_api_key()
         self.data_url = self.client.get_data_url()
+        self.dane_url = self.client.get_dane_url()
         self.request_url = f"{self.data_url}/{self.api_key}/{self.filename}"
 
     
-    def download_file_txt(self):
+    def download_file_txt(self, save_path:str ="data.json"):
         """ 
         Download file from url and save it to file on disc. 
         
@@ -36,7 +38,7 @@ class Downloader:
             return False
         
         try:
-            with open('data.json', 'w', encoding='utf-8') as file:
+            with open(save_path, 'w', encoding='utf-8') as file:
                 file.write(response.text)
                 logging.info("File downloaded succesfully, saved as 'data.json' .")
                 return True
@@ -87,3 +89,65 @@ class Downloader:
             logging.error(f"Error during downloading data: {e}")
             return None
 
+
+    def get_webpage_content(self, url:str ):
+        """
+        Download webpage content from given URL.
+
+        :param url: URL of webpage to download
+        :return : Touple containing (status_code, headers, content) or (None, None, None)
+        """
+        try:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+
+            logging.info(f"Successfully downloaded content from {url}")
+            return (
+                response.status_code,
+                dict(response.headers),
+                response.text
+            )
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error downloading webpage {url, {e}}")
+            return None, None, None
+        
+    
+    def download_and_save_image(self, save_path: str = None, image_url: str = None) -> bool:
+        """
+        Download image from aidevs3 server and save it to disc.
+
+        Args:
+            save_path: Path where to save the image
+
+        Returns:
+            bool: True if download was successful, False otherwise
+        """
+        try:
+            request_url = os.path.join(self.dane_url, image_url)
+            response = requests.get(request_url)
+            response.raise_for_status()
+
+            # Ensure that saving direcotry exists
+            os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else ".", exist_ok=True)
+
+            # Save the image
+            with open(save_path, "wb") as file:
+                file.write(response.content)
+                logging.info(f"Image downloaded successfully, saved as '{save_path}'")
+                return True
+        
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error durin image download: {e}")
+            return False
+        except IOError as e:
+            logging.error(f"Error saving image: {e}")
+            return False
+
+
+
+        
+    
+        
