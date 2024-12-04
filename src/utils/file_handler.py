@@ -110,3 +110,55 @@ class FileHandler():
         except Exception as e:
             logging.error(f"Error occurred during image processing: {e}")
             raise
+
+    @staticmethod
+    def get_list_file_paths_from_direcotry(directory_path: str, file_extensions: list[str] = None) -> list[str]:
+        """
+        Gets list of full file paths for files from specific directory.
+
+        Parameters:
+            directory_path (str): Path to directory to scan
+            file_extensions (List[str], Optional): List of file extension to filter (e.g. ['.txt', '.png', '.mp3', '.doc'])
+                                                    If None -> returns all files path
+
+        Returns:
+            List[str]: List of fill file paths
+
+        Raises:
+            FileNotFoundError: If directory doesn't exist
+            PermissionError: If no access to directory
+        """
+        try:
+            # Convert string path to Path object
+            dir_path = Path(directory_path)
+
+            if not dir_path.exists():
+                raise FileNotFoundError(f"Directory not found: {directory_path}")
+            
+            if not dir_path.is_dir():
+                raise NotADirectoryError(f"Path is not a directory: {directory_path}")
+            
+            # Get all files from directory
+            if file_extensions:
+                # If extensions specified, filter files
+                files = [
+                    str(file.absolute())
+                    for file in dir_path.iterdir()
+                    if file.is_file() and file.suffix.lower() in file_extensions
+                ]
+            else:
+                # If no extensions specified, get all files
+                files = [
+                    str(file.absolute())
+                    for file in dir_path.iterdir()
+                    if file.is_file()
+                ]
+            logging.info(f"Successfully retrieved {len(files)} files form {directory_path}")
+            return files
+        
+        except PermissionError as pe:
+            logging.error(f"Permission denied when accessing direcotry: {directory_path}")
+            raise
+        except Exception as e:
+            logging.error(f"Error occured while scanning direcory {directory_path}: {e}")
+            raise
