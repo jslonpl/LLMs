@@ -114,3 +114,34 @@ class OpenAIClient:
 
         response_data = response.json()
         return response_data.get("choices", [])[0].get("message", {}).get("content", "")
+    
+
+    def generate_embedding(self, text: str, model: str = "text-embedding-3-small") -> list:
+        """
+        Generate embeddings for the given text using OpenAI's models.
+
+        Parameters:
+            text (str) : Text based on which embedding will be generated.
+            model (str) : embedding model
+        
+        Returns:
+            List[int] : List containing embedding vector
+
+        Avalilable OpenAI'm embedding models:
+            defalt : text-embedding-3-small
+                     text-embedding-3-large
+                     text-embedding-ada-002
+        """
+        url = f"{self.base_url}/embeddings"
+        payload = {
+            "model": model,
+            "input": text
+        }
+        
+        response = requests.post(url, headers=self._headers(), json=payload)
+
+        if response.status_code != 200:
+            self._handle_error(response)
+
+        response_data = response.json()
+        return response_data.get("data",[])[0].get("embedding",[])
