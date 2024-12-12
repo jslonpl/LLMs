@@ -9,6 +9,7 @@ class Aidevs3Client:
         self._endpoint_url = self._get_env_var('AI_DEVS_3_ENDPOINT_URL')
         self._data_url = self._get_env_var('AI_DEVS_3_DATA_URL')
         self._dane_url = self._get_env_var('AI_DEVS_3_DANE_URL')
+        self._db_url = self._get_env_var("AI_DEVS_3_DB_URL")
 
     def _get_env_var(self, var_name: str) -> str:
         value = os.getenv(var_name)
@@ -27,3 +28,6 @@ class Aidevs3Client:
     
     def get_dane_url(self):
         return self._dane_url
+    
+    def get_db_url(self):
+        return self._db_url
