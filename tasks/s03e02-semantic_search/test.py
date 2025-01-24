@@ -84,7 +84,8 @@ def sent_data_to_aidevs3():
 
 
 def main():
-    sent_data_to_aidevs3()
+    #sent_data_to_aidevs3()
+    print(qdrant_search())
 
 if __name__ == "__main__":
     main()

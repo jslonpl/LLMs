@@ -3,6 +3,7 @@ import logging
 import base64
 import imghdr
 from pathlib import Path
+import csv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -16,6 +17,7 @@ class FileHandler():
     - read JSON files from disc (.json)
     - save JSON files to disc (.json)
     - load image and return its base64 encoded string
+    - save to csv
 
     Usage exampe:
     handler = FileHandler()
@@ -162,3 +164,77 @@ class FileHandler():
         except Exception as e:
             logging.error(f"Error occured while scanning direcory {directory_path}: {e}")
             raise
+    
+    @staticmethod
+    def save_to_csv(file_path: str, data: dict, columns: list[str]) -> None:
+        """
+        Save dictrionary to a CSV file with specified columns.
+
+        Parameters:
+            file_path (str): Path where to save the CSV file
+            data (dict): Dictionary containing list of records to save
+            columns (list[str]): List of column names to extract from each record
+
+        Example:
+            data = {'reply': [{'id': '1', 'username': 'Adrian'}, {'id': '2', 'username': 'Monika'}]}
+            columns = ['id', 'username']
+            save_to_csv('users.csv', data, columns)
+        """
+        try:
+            records = data.get('reply', [])
+
+            with open(file_path, 'w', newline='', encoding='utf-8') as csv_file:
+                writer = csv.writer(csv_file)
+                # write header
+                writer.writerow(columns)
+                # write data rows
+                for record in records:
+                    row = [record.get(col, '') for col in columns]
+                    writer.writerow(row)
+
+            logging.info(f"Successfully saved CSV file: {file_path}")
+
+        except Exception as e:
+            logging.error(f"Error occurred during saving CSV file: {e}")
+            raise
+
+    
+    @staticmethod
+    def load_csv(file_path: str, as_dict: bool = True) -> list:
+        """
+        Load data from a CSV file.
+
+        Parameters:
+            file_path (str): Path to the cvs file
+            as_dict (bool): If true, returns list of dictionaries, if False returns list
+
+        Returns:
+            list: List of records (euther dictionaries or lists depending on as_dict parameter)
+
+        Example:
+            # As dictionary
+            data = load_csv('users.csv') # Returns: [{'id': '1', 'username': 'Adrian'}, ...]
+            # As list
+            data = load_csv('users.csv, as_dict=False) # Returns: [['1', 'Adrian'], ...]
+        """
+        try:
+            with open(file_path, 'r', encoding="utf-8") as csv_file:
+                csv_reader = csv.reader(csv_file)
+                # Read Headers
+                headers = next(csv_reader)
+
+                if as_dict:
+                    data = [dict(zip(headers, row)) for row in csv_reader]
+                else:
+                    data = [row for row in csv_reader]
+            logging.info(f"Successfully loaded CSV file: {file_path}")
+            return data
+        
+        except FileNotFoundError:
+            logging.error(f"CSV file not found! Check path {file_path}")
+            raise
+        except Exception as e:
+            logging.error(f"Error occured during loading CSV file: {e}")
+            raise
+        
+
